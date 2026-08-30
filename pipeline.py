@@ -8,7 +8,7 @@ from models import Job
 from scrapers import GreenhouseScraper, LeverScraper, SmartRecruitersScraper
 from extractors import GreenhouseExtractor
 from ai import generate_answers
-from telegram import send_job, send_summary
+from notifier import send_job, send_summary
 
 logger = logging.getLogger(__name__)
 
