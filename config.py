@@ -23,8 +23,16 @@ SCHEDULE_HOURS = [8, 18]  # run at 08:00 and 18:00 UTC
 # --- Company registry ---
 COMPANIES = {
     # Greenhouse companies
+    "Miro":              {"ats": "greenhouse", "slug": "realtimeboardglobal", "region": "global"},
+    "Catawiki":          {"ats": "greenhouse", "slug": "catawiki",            "region": "eu"},
+    "GitLab":            {"ats": "greenhouse", "slug": "gitlab",              "region": "global"},
+    "Cloudflare":        {"ats": "greenhouse", "slug": "cloudflare",          "region": "global"},
+    "Backbase":          {"ats": "greenhouse", "slug": "workatbackbase",      "region": "eu"},
+    "DRW":               {"ats": "greenhouse", "slug": "drweng",              "region": "global"},
+    "Graviton Research": {"ats": "greenhouse", "slug": "gravitonresearchcapital", "region": "eu"},
+    "DEPT":              {"ats": "greenhouse", "slug": "dept",                "region": "eu"},
     "Adyen":         {"ats": "greenhouse", "slug": "adyen",        "region": "global"},
-    "IMC Trading":   {"ats": "greenhouse", "slug": "imc",          "region": "eu"},
+    "IMC Trading":   {"ats": "greenhouse", "slug": "imc",          "region": "global"},
     "Flow Traders":  {"ats": "greenhouse", "slug": "flowtraders",  "region": "global"},
     "Databricks":    {"ats": "greenhouse", "slug": "databricks",   "region": "global"},
     "Picnic":        {"ats": "greenhouse", "slug": "picnic",       "region": "global"},
@@ -33,11 +41,15 @@ COMPANIES = {
     "Optiver":       {"ats": "greenhouse", "slug": "optiver",      "region": "global"},
     "JetBrains":     {"ats": "greenhouse", "slug": "jetbrains",    "region": "global"},
     # Lever companies
+    "Spotify":           {"ats": "lever", "slug": "spotify",  "region": "global"},
+    "Veeva Systems":     {"ats": "lever", "slug": "veeva",    "region": "global"},
     "Prosus":        {"ats": "lever", "slug": "prosus",  "region": "eu"},
     "TomTom":        {"ats": "lever", "slug": "tomtom",  "region": "eu"},
     # SmartRecruiters companies
     "Booking.com":   {"ats": "smartrecruiters", "slug": "Bookingcom1", "region": "global"},
     "ASML":          {"ats": "smartrecruiters", "slug": "ASML1",       "region": "global"},
+    # Custom
+    "Picnic": {"ats": "greenhouse", "slug": "picnic", "region": "global"},
 }
 
 # --- Filtering ---
@@ -52,6 +64,7 @@ ROLE_KEYWORDS = [
     "quant", "quantitative", "research",
     "devops", "infrastructure", "platform",
     "backend", "frontend", "full-stack", "fullstack",
+    "agentic", "agent",
 ]
 
 LOCATION_KEYWORDS = [
