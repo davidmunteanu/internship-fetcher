@@ -5,7 +5,7 @@ import aiosqlite
 from config import DB_PATH, COMPANIES, PROFILE_PATH, TITLE_KEYWORDS, ROLE_KEYWORDS, LOCATION_KEYWORDS
 from db import init_db, job_exists, insert_job, insert_questions, update_job_status, log_run
 from models import Job
-from scrapers import GreenhouseScraper, LeverScraper, SmartRecruitersScraper
+from scrapers import GreenhouseScraper, LeverScraper, SmartRecruitersScraper, AshbyScraper, WorkdayScraper
 from extractors import GreenhouseExtractor
 from ai import generate_answers
 from notifier import send_job, send_summary
@@ -56,22 +56,36 @@ async def run_pipeline() -> None:
         slug = details.get("slug")
         region = details.get("region")
         
-        scraper = None
-        if ats == "greenhouse":
-            scraper = GreenhouseScraper()
-        elif ats == "lever":
-            scraper = LeverScraper()
-        elif ats == "smartrecruiters":
-            scraper = SmartRecruitersScraper()
-            
-        if scraper:
-            try:
+        try:
+            if ats == "greenhouse":
+                scraper = GreenhouseScraper()
                 jobs = await scraper.scrape(company_name, slug, region)
-                all_jobs.extend(jobs)
-            except Exception as e:
-                err_msg = f"Failed to scrape {company_name}: {e}"
-                logger.error(err_msg)
-                errors.append(err_msg)
+            elif ats == "lever":
+                scraper = LeverScraper()
+                jobs = await scraper.scrape(company_name, slug, region)
+            elif ats == "smartrecruiters":
+                scraper = SmartRecruitersScraper()
+                jobs = await scraper.scrape(company_name, slug, region)
+            elif ats == "ashby":
+                scraper = AshbyScraper()
+                jobs = await scraper.scrape(company_name, slug, region)
+            elif ats == "workday":
+                scraper = WorkdayScraper()
+                jobs = await scraper.scrape(
+                    company_name,
+                    tenant=details.get("tenant"),
+                    dc=details.get("dc"),
+                    site=details.get("site")
+                )
+            else:
+                logger.warning(f"Unknown ATS type: {ats} for {company_name}")
+                continue
+
+            all_jobs.extend(jobs)
+        except Exception as e:
+            err_msg = f"Failed to scrape {company_name}: {e}"
+            logger.error(err_msg)
+            errors.append(err_msg)
 
     # Filter
     filtered_jobs = [j for j in all_jobs if matches_filters(j)]
