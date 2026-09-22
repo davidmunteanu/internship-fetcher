@@ -1,9 +1,11 @@
 import logging
 import asyncio
+import html
 from telegram import Bot
 from telegram.constants import ParseMode
 from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 from models import Job, Answer
+from aggregators import to_tsv_row
 
 logger = logging.getLogger(__name__)
 
@@ -80,3 +82,17 @@ async def send_job(job: Job, answers: list[Answer]) -> None:
         )
     except Exception as e:
         logger.error(f"Error sending Telegram job message for {job.id}: {e}")
+
+# NEW: the Excel row as its own message, in a code block so one tap copies it
+async def send_row(job: Job) -> None:
+    if not bot:
+        return
+    try:
+        await bot.send_message(
+            chat_id=TELEGRAM_CHAT_ID,
+            text=f"<pre>{html.escape(to_tsv_row(job))}</pre>",
+            parse_mode=ParseMode.HTML,
+            disable_web_page_preview=True,
+        )
+    except Exception as e:
+        logger.error(f"Error sending Excel row for {job.id}: {e}")
