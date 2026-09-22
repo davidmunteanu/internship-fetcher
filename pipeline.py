@@ -2,13 +2,15 @@ import asyncio
 import logging
 from datetime import datetime
 import aiosqlite
+import httpx
 from config import DB_PATH, COMPANIES, PROFILE_PATH, TITLE_KEYWORDS, ROLE_KEYWORDS, LOCATION_KEYWORDS
 from db import init_db, job_exists, insert_job, insert_questions, update_job_status, log_run
 from models import Job
 from scrapers import GreenhouseScraper, LeverScraper, SmartRecruitersScraper, AshbyScraper, WorkdayScraper
 from extractors import GreenhouseExtractor
 from ai import generate_answers
-from notifier import send_job, send_summary
+from notifier import send_job, send_summary, send_row
+from aggregators import fetch_aggregators, visa_for
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +26,9 @@ def matches_filters(job: Job) -> bool:
     if not is_relevant_role:
         return False
 
-    is_nl = any(kw in location_lower for kw in LOCATION_KEYWORDS)
-    if not is_nl:
+    # CHANGED: was NL-only; now also accepts London/Dublin/Zurich/Munich/Bucharest via visa_for
+    in_region = any(kw in location_lower for kw in LOCATION_KEYWORDS) or visa_for(job.location) is not None
+    if not in_region:
         return False
 
     return True
@@ -87,6 +90,12 @@ async def run_pipeline() -> None:
             logger.error(err_msg)
             errors.append(err_msg)
 
+    # NEW: aggregator sources (Simplify + Emjumaev), minus postings the ATS scrapers already found
+    async with httpx.AsyncClient(follow_redirects=True) as client:
+        agg_jobs, agg_errors = await fetch_aggregators(client, all_jobs)
+    all_jobs.extend(agg_jobs)
+    errors.extend(agg_errors)
+
     # Filter
     filtered_jobs = [j for j in all_jobs if matches_filters(j)]
     jobs_found = len(filtered_jobs)
@@ -146,6 +155,7 @@ async def run_pipeline() -> None:
 
         try:
             await send_job(job, answers)
+            await send_row(job)  # NEW: separate message with the tab-separated Excel row
             await update_job_status(job.id, "notified")
             await asyncio.sleep(1)
         except Exception as e:
