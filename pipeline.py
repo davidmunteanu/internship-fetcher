@@ -9,7 +9,8 @@ from models import Job
 from scrapers import GreenhouseScraper, LeverScraper, SmartRecruitersScraper, AshbyScraper, WorkdayScraper
 from extractors import GreenhouseExtractor
 from ai import generate_answers
-from notifier import send_job, send_summary, send_row
+from notifier import send_job, send_summary
+from notifier.bot import send_row
 from aggregators import fetch_aggregators, visa_for
 
 logger = logging.getLogger(__name__)
